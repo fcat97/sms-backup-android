@@ -4,7 +4,7 @@ Android library to Backup and Restore SMS
 ---
 🟩 __Setup:__
   
-  Add it in your root build.gradle at the end of repositories:
+  ⚡Add it in your root build.gradle at the end of repositories:
   ```gradle
   allprojects {
 		repositories {
@@ -14,10 +14,13 @@ Android library to Backup and Restore SMS
 	}
   ```
 
-  Add the dependency
+  ⚡Add the dependency 
+  
+  *current version:* [![](https://jitpack.io/v/fcat97/sms-backup-android.svg)](https://jitpack.io/#fcat97/sms-backup-android)
+
   ```gradle
   dependencies {
-	        implementation 'com.github.fcat97:sms-backup-android:Tag'
+	        implementation 'com.github.fcat97:sms-backup-android:version'
 	}
   ```
 
