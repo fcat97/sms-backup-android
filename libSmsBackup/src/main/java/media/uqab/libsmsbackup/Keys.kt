@@ -1,6 +1,6 @@
 package media.uqab.libsmsbackup
 
-object Keys {
+internal object Keys {
     const val META_DATE = "date"
     const val META_VERSION = "version"
     const val META_CURRENT_VERSION = 1

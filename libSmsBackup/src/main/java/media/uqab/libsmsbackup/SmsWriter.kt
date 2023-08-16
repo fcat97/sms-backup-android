@@ -52,6 +52,10 @@ class SmsWriter {
      * SMS application. To request to be default app for sms use
      * intent from [getSmsAppChangingIntent].
      *
+     * @param context Android's [Context]
+     * @param smsList List of [Sms] to restore.
+     * @param onProgress lambda to notify progress as (progress, total).
+     *
      * @return `false` if any sms failed to write
      */
     fun writeSmsToInbox(
@@ -99,6 +103,10 @@ class SmsWriter {
 
     /**
      * Write sms back in sd card
+     *
+     * @param sms List of [Sms] to create backup
+     * @param uri [Uri] of the output file.
+     * @return `true` if written successful, `false` otherwise.
      */
     suspend fun createBackup(context: Context, sms: List<Sms>, uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {

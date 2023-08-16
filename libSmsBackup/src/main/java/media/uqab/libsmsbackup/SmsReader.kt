@@ -12,11 +12,28 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Date
 
+/**
+ * [Sms] reader class.
+ * Read [Sms] either from user's message inbox or
+ * from a backup file from file system.
+ *
+ * @author github/fCat97
+ */
 class SmsReader {
     companion object {
         private const val TAG = "SmsReader"
     }
 
+    /**
+     * Get all sms from phone's inbox.
+     *
+     * @param context [Context]
+     * @param selection condition to query. See, [android.content.ContentResolver.query] for detail.
+     * @param selectionArgs arguments for [selection]. See, [android.content.ContentResolver.query] for detail.
+     * @param sortOrder sorting order. See, [android.content.ContentResolver.query] for detail.
+     *
+     * @return list of [Sms] queried.
+     */
     fun readAllSmsFromInbox(
         context: Context,
         selection: String? = null,
@@ -85,6 +102,14 @@ class SmsReader {
         return smsList
     }
 
+    /**
+     * Parse a backup file to [Sms].
+     *
+     * @param context Android's [Context].
+     * @param uri backup files [Uri].
+     *
+     * @return list of [Sms] read from backup file
+     */
     suspend fun readFromBackup(context: Context, uri: Uri): List<Sms> {
         val smsList = mutableListOf<Sms>()
 

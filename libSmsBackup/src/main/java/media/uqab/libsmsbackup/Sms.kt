@@ -2,6 +2,9 @@ package media.uqab.libsmsbackup
 
 import org.json.JSONObject
 
+/**
+ * Model class of an SMS.
+ */
 class Sms {
     var address: String = ""
     var body: String = ""
