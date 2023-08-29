@@ -4,6 +4,7 @@ import android.app.role.RoleManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.database.DatabaseUtils
 import android.net.Uri
 import android.os.Build
 import android.provider.Telephony
@@ -19,7 +20,6 @@ import media.uqab.libsmsbackup.Keys.META_VERSION
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Date
-import java.util.function.BiConsumer
 
 class SmsWriter {
     companion object {
@@ -55,13 +55,15 @@ class SmsWriter {
      * @param context Android's [Context]
      * @param smsList List of [Sms] to restore.
      * @param onProgress lambda to notify progress as (progress, total).
+     * @param result a map to get result such as ignored, inserted, failed etc.
      *
      * @return `false` if any sms failed to write
      */
     fun writeSmsToInbox(
         context: Context,
         smsList: List<Sms>,
-        onProgress: (Int, Int) -> Unit
+        onProgress: (Int, Int) -> Unit,
+        result: MutableMap<String, String> = mutableMapOf()
     ): Boolean {
         if (!isDefaultSmsApp(context)) return false
         if (smsList.isEmpty()) return true
@@ -74,18 +76,26 @@ class SmsWriter {
             Telephony.Sms.TYPE
         )
 
+        var ignored = 0
+        var inserted = 0
+        var failed = 0
         var current = 0
-        return smsList.all { sms ->
-            safe {
+        var tempUri: Uri?
+
+        val success = smsList.all { sms ->
+            try {
                 onProgress(++current, smsList.size)
 
                 // check if the value already exists or not
-                val selection = "address='${sms.address}' AND date='${sms.date}' AND date_sent='${sms.dateSent}' and type=${sms.type.value}"
+                val selection = "address=${DatabaseUtils.sqlEscapeString(sms.address)} AND date='${sms.date}' AND date_sent='${sms.dateSent}' and type=${sms.type.value}"
                 val cursor = cr.query(Telephony.Sms.CONTENT_URI, projection, selection, null, null)
                 val count = cursor?.count ?: 0
                 cursor?.close()
                 Log.d(TAG, "writeSmsToInbox: inserting: $count $sms")
-                if(count >= 1) return@all true
+                if (count >= 1) {
+                    ignored ++
+                    return@all true
+                }
 
                 val values = ContentValues()
                 values.put(Telephony.Sms.ADDRESS, sms.address)
@@ -96,9 +106,23 @@ class SmsWriter {
                 values.put(Telephony.Sms.STATUS, sms.seen)
                 values.put(Telephony.Sms.TYPE, sms.type.value)
                 // context.contentResolver.insert(Uri.parse("content://sms/inbox"), values)
-                cr.insert(Uri.parse("content://sms/"), values)
-            } != null
+                tempUri = cr.insert(Uri.parse("content://sms/"), values)
+                if (tempUri == null) failed ++
+                else inserted ++
+
+                // return
+                tempUri != null
+            } catch (e: Exception) {
+                failed ++
+                false
+            }
         }
+
+        result["inserted"] = inserted.toString()
+        result["failed"] = failed.toString()
+        result["ignored"] = ignored.toString()
+
+        return success
     }
 
     /**

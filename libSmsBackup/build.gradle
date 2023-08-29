@@ -40,7 +40,7 @@ afterEvaluate {
         publications {
             maven(MavenPublication) {
                 group = 'media.uqab.libSmsBackup'
-                version = '1.0.0'
+                version = '1.0.2'
                 artifactId = "libSmsBackup"
                 from components.release
 
